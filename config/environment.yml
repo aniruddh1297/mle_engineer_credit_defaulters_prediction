@@ -1,0 +1,17 @@
+name: mle-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pandas
+  - numpy
+  - scikit-learn
+  - openpyxl
+  - xlrd
+  - matplotlib
+  - seaborn
+  - pip
+  - pip:
+      - joblib
+      - xgboost

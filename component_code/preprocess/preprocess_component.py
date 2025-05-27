@@ -1,3 +1,6 @@
+# components/preprocess_component.py
+
+import argparse
 import pandas as pd
 import numpy as np
 import os
@@ -18,22 +21,22 @@ def clean_data(df):
     return df
 
 def feature_engineering(df):
-    # Aggregated features
     df['avg_bill_amt'] = df[[f'bill_amt{i}' for i in range(1, 7)]].mean(axis=1)
     df['avg_pay_amt'] = df[[f'pay_amt{i}' for i in range(1, 7)]].mean(axis=1)
     df['pay_ratio'] = (df['avg_pay_amt'] / df['avg_bill_amt']).replace([np.inf, -np.inf], 0).fillna(0)
     df['recent_default_flag'] = (df['pay_0'] >= 1).astype(int)
-
-    # New behavioral/risk features
     df['max_pay_delay'] = df[['pay_0', 'pay_2', 'pay_3', 'pay_4', 'pay_5', 'pay_6']].max(axis=1)
     df['bill_trend_up'] = (df['bill_amt6'] > df['bill_amt1']).astype(int)
     df['pay_stability'] = df[[f'pay_amt{i}' for i in range(1, 7)]].std(axis=1).fillna(0)
 
-    X = df.drop(columns=['default_payment_next_month'])
     y = df['default_payment_next_month']
+    X = df.drop(columns=['default_payment_next_month'])
 
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    X_scaled_np = scaler.fit_transform(X)
+
+    # Convert back to DataFrame to preserve feature names
+    X_scaled = pd.DataFrame(X_scaled_np, columns=X.columns)
 
     return X_scaled, y, scaler
 
@@ -46,15 +49,18 @@ def split_and_save(X, y, output_dir):
     joblib.dump((X_val, y_val), os.path.join(output_dir, "val.pkl"))
     joblib.dump((X_test, y_test), os.path.join(output_dir, "test.pkl"))
 
-def main():
-    raw_path = "data/default_of_credit_card_clients.xls"
-    output_dir = "data/processed"
-    df = load_data(raw_path)
+def main(args):
+    df = load_data(args.input_data)
     df = clean_data(df)
     X, y, scaler = feature_engineering(df)
-    split_and_save(X, y, output_dir)
-    joblib.dump(scaler, os.path.join(output_dir, "scaler.pkl"))
-    print("✅ Preprocessing v2 complete with advanced features.")
+    split_and_save(X, y, args.output_path)
+    joblib.dump(scaler, os.path.join(args.output_path, "scaler.pkl"))
+    print("✅ Preprocessing complete in Azure ML component.")
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input_data", type=str, required=True)
+    parser.add_argument("--output_path", type=str, required=True)
+    args = parser.parse_args()
+
+    main(args)

@@ -1,0 +1,23 @@
+name: evaluate_model_v1
+display_name: Evaluate Model
+version: 6
+type: command
+
+inputs:
+  input_data:
+    type: uri_folder
+  model_path:
+    type: uri_folder
+
+outputs:
+  output_path:
+    type: uri_folder
+
+code: . 
+environment: azureml:mle-env:1
+
+command: >
+  python evaluate_component.py
+  --input_data ${{inputs.input_data}}
+  --model_path ${{inputs.model_path}}
+  --output_path ${{outputs.output_path}}
