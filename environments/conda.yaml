@@ -1,0 +1,10 @@
+name: ml-az-interview-task
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - azure-ai-ml
+      - pandas
+      - scikit-learn
+      - matplotlib
+      - mlflow
