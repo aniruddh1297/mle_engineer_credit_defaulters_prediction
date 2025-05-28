@@ -7,3 +7,6 @@ xlrd
 xgboost
 matplotlib 
 seaborn
+azure-ai-ml
+azure-identity
+python-dotenv
