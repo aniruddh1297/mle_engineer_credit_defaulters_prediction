@@ -1,6 +1,6 @@
 name: preprocess_v2
 display_name: Preprocess Data
-version: 6
+version: 11
 type: command
 inputs:
   input_data:
@@ -9,6 +9,6 @@ outputs:
   output_path:
     type: uri_folder
 code: .
-environment: azureml:mle-env:1
+environment: azureml:mle-env:5
 command: >-
   python preprocess_component.py --input_data ${{inputs.input_data}} --output_path ${{outputs.output_path}}

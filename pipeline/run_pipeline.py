@@ -72,6 +72,18 @@ preprocess_component = get_latest_component("preprocess_v2")
 train_component = get_latest_component("train_model_v1")
 evaluate_component = get_latest_component("evaluate_model_v1")
 
+def get_latest_environment(name):
+    envs = ml_client.environments.list(name=name)
+    latest = max(envs, key=lambda x: int(x.version))
+    print(f"🔄 Using latest version of environment '{name}': v{latest.version}")
+    return latest
+
+# Step 2: After loading components
+latest_env = get_latest_environment("mle-env")
+preprocess_component.environment = latest_env.id
+train_component.environment = latest_env.id
+evaluate_component.environment = latest_env.id
+
 # Define pipeline
 @pipeline(default_compute="cpu-cluster")
 def credit_default_pipeline(input_data):
