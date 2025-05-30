@@ -99,7 +99,11 @@ jobs:
       - name: 📄 Get last commit message
         id: get_commit
         run: |
-          echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+          {
+            echo "message<<EOF"
+            git log -1 --pretty=%B
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: 📦 Upload Data
         if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
@@ -121,4 +125,4 @@ jobs:
         run: |
           python pipeline/run_pipeline.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
 
-#tesing4
+
