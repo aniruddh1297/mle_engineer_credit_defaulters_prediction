@@ -1,6 +1,7 @@
 # import os
 # import argparse
 # import urllib.request
+# import hashlib
 # from datetime import datetime
 # from azure.identity import DefaultAzureCredential
 # from azure.ai.ml import MLClient
@@ -24,8 +25,26 @@
 #     else:
 #         print(f"✅ Dataset already exists locally: {local_path}")
 
+# def calculate_file_hash(file_path: str) -> str:
+#     hasher = hashlib.md5()
+#     with open(file_path, "rb") as f:
+#         buf = f.read()
+#         hasher.update(buf)
+#     return hasher.hexdigest()
+
 # def upload_data(ml_client, local_path):
 #     base_name = "credit_default_data"
+#     file_hash = calculate_file_hash(local_path)
+
+#     print(f"🔍 Calculated MD5 hash: {file_hash}")
+
+#     # Check if a dataset with this hash already exists (via tags)
+#     existing_assets = list(ml_client.data.list(name=base_name))
+#     for asset in existing_assets:
+#         if asset.tags and asset.tags.get("hash") == file_hash:
+#             print(f"⚠️ Matching dataset already exists: {asset.name}:{asset.version}. Skipping upload.")
+#             return
+
 #     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
 #     version = f"v{timestamp}"
 
@@ -35,6 +54,7 @@
 #         description="Credit card default dataset uploaded for pipeline input",
 #         path=local_path,
 #         type=AssetTypes.URI_FILE,
+#         tags={"hash": file_hash},
 #     )
 
 #     ml_client.data.create_or_update(data_asset)
@@ -57,6 +77,7 @@
 #     client = get_ml_client(args.env)
 #     print(f"✅ Connected to workspace: {client.workspace_name}")
 #     upload_data(client, local_path)
+
 
 
 import os
@@ -89,8 +110,8 @@ def download_google_sheet_as_excel(local_path: str, sheet_id: str):
 def calculate_file_hash(file_path: str) -> str:
     hasher = hashlib.md5()
     with open(file_path, "rb") as f:
-        buf = f.read()
-        hasher.update(buf)
+        while chunk := f.read(8192):
+            hasher.update(chunk)
     return hasher.hexdigest()
 
 def upload_data(ml_client, local_path):
@@ -99,13 +120,14 @@ def upload_data(ml_client, local_path):
 
     print(f"🔍 Calculated MD5 hash: {file_hash}")
 
-    # Check if a dataset with this hash already exists (via tags)
+    # Check if dataset with same hash already exists
     existing_assets = list(ml_client.data.list(name=base_name))
     for asset in existing_assets:
         if asset.tags and asset.tags.get("hash") == file_hash:
-            print(f"⚠️ Matching dataset already exists: {asset.name}:{asset.version}. Skipping upload.")
+            print(f"⚠️ Identical dataset already registered: {asset.name}:{asset.version} — skipping upload.")
             return
 
+    # If not found, register a new version
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     version = f"v{timestamp}"
 
@@ -119,7 +141,7 @@ def upload_data(ml_client, local_path):
     )
 
     ml_client.data.create_or_update(data_asset)
-    print(f"📦 Registered data asset: {base_name}:{version}")
+    print(f"📦 Registered new data asset: {base_name}:{version}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
