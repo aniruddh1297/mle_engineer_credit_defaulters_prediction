@@ -1,0 +1,45 @@
+name: Azure ML Pipeline CI
+
+on:
+  push:
+    paths:
+      - "component_code/**.yaml"
+      - "component_code/**.py"
+      - "pipeline/run_pipeline.py"
+      - "register_scripts/**.py"
+      - "config/**.yaml"
+      - ".github/workflows/azureml-pipeline-ci.yml"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install azure-ai-ml azure-identity
+
+      - name: 🔐 Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+
+      - name: 📦 Register Azure ML components
+        run: |
+          python register_scripts/register_component.py
+
+      - name: 🚀 Run Azure ML pipeline
+        run: |
+          python pipeline/run_pipeline.py

@@ -1,5 +1,5 @@
 name: train_model_v1
-version: 29
+version: 31
 display_name: Train Model
 
 # Define the type of job
@@ -16,7 +16,7 @@ outputs:
     type: uri_folder
 
 # Define environment (should already be registered)
-environment: azureml:mle-env:5
+environment: azureml:mle-env@latest
 
 # Code folder and entry command
 code: .

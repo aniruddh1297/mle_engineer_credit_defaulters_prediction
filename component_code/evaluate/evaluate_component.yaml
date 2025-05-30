@@ -1,6 +1,6 @@
 name: evaluate_model_v1
 display_name: Evaluate Model
-version: 13
+version: 15
 type: command
 
 inputs:
@@ -14,7 +14,7 @@ outputs:
     type: uri_folder
 
 code: . 
-environment: azureml:mle-env:5
+environment: azureml:mle-env@latest
 
 command: >
   python evaluate_component.py

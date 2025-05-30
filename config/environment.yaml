@@ -20,3 +20,5 @@ dependencies:
       - azure-ai-ml==1.17.0
       - azure-identity
       - marshmallow==3.20.1 
+      - tqdm
+      - azureml-inference-server-http

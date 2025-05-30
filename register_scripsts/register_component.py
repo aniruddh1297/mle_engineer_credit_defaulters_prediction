@@ -1,13 +1,13 @@
 import os
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from azure.ai.ml import MLClient, load_component
 
-# Authenticate with Azure CLI
-credential = AzureCliCredential()
+# Authenticate using DefaultAzureCredential (supports CLI, VS Code, managed identity, etc.)
+credential = DefaultAzureCredential()
 ml_client = MLClient.from_config(credential=credential)
 print("✅ Connected to Azure ML Workspace")
 
-# Collect all component YAML files from component_code/
+# Collect all component YAML files from the component_code folder
 component_paths = []
 for root, _, files in os.walk("component_code"):
     for file in files:

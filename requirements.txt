@@ -10,3 +10,6 @@ seaborn
 azure-ai-ml
 azure-identity
 python-dotenv
+marshmallow==3.20.1
+azureml-mlflow
+mlflow

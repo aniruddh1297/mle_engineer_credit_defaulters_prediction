@@ -1,0 +1,10 @@
+$schema: https://azuremlschemas.azureedge.net/latest/onlineDeployment.schema.json
+name: blue-deployment
+endpoint_name: credit-default-endpoint
+model: azureml:credit-default-model@latest
+environment: azureml:mle-env@latest
+code_configuration:
+  code: ./serve
+  scoring_script: score.py
+instance_type: Standard_DS2_v2
+instance_count: 1
