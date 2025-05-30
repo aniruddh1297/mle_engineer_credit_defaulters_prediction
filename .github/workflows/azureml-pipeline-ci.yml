@@ -1,7 +1,56 @@
-name: Azure ML Pipeline CI
+# name: Azure ML Pipeline CI
+
+# on:
+#   push:
+#     paths:
+#       - "component_code/**.yaml"
+#       - "component_code/**.py"
+#       - "pipeline/run_pipeline.py"
+#       - "register_scripts/**.py"
+#       - "config/**.yaml"
+#       - ".github/workflows/azureml-pipeline-ci.yml"
+
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: ⬇️ Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: 🐍 Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10"
+
+#       - name: 📦 Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+#           pip install azure-ai-ml azure-identity
+
+#       - name: 🔐 Login to Azure (Service Principal)
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: 📦 Register Azure ML components
+#         run: |
+#           python register_scripts/register_component.py
+
+#       - name: 🚀 Run Azure ML pipeline
+#         run: |
+#           python pipeline/run_pipeline.py
+
+
+name: Azure ML Multi-Env Pipeline CI
 
 on:
   push:
+    branches:
+      - release/dev
+      - release/test
+      - main
     paths:
       - "component_code/**.yaml"
       - "component_code/**.py"
@@ -13,7 +62,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v3
@@ -29,15 +78,23 @@ jobs:
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
 
-      - name: 🔐 Login to Azure (Service Principal)
+      - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: 📦 Register Azure ML components
+      - name: 📦 Upload Data
         run: |
-          python register_scripts/register_component.py
+          python register_scripts/data_upload.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }} --use_drive
 
-      - name: 🚀 Run Azure ML pipeline
+      - name: 📦 Register Environment
         run: |
-          python pipeline/run_pipeline.py
+          python register_scripts/register_env.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+      - name: 📦 Register Azure ML Components
+        run: |
+          python register_scripts/register_component.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+      - name: 🚀 Run Azure ML Pipeline
+        run: |
+          python pipeline/run_pipeline.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
