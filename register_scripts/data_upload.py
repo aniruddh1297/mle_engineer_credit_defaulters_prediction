@@ -160,3 +160,5 @@ if __name__ == "__main__":
     client = get_ml_client(args.env)
     print(f"✅ Connected to workspace: {client.workspace_name}")
     upload_data(client, local_path)
+
+#test
