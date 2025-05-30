@@ -85,7 +85,7 @@ jobs:
 
       - name: 📦 Upload Data
         run: |
-          python register_scripts/data_upload.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+          python register_scripts/data_upload.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }} --use_drive
 
       - name: 📦 Register Environment
         run: |
