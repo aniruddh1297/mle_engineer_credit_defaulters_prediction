@@ -120,3 +120,5 @@ jobs:
         if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
         run: |
           python pipeline/run_pipeline.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+#testing 
