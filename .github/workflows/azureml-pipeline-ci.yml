@@ -168,9 +168,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [promote, run-prod-pipeline]
-    if: |
-      (needs.promote.result == 'success') ||
-      (needs.run-prod-pipeline.result != null && needs.run-prod-pipeline.result == 'success')
+    if: >
+      always() &&
+      (
+        needs.promote.result == 'success' ||
+        (contains(needs, 'run-prod-pipeline') && needs.run-prod-pipeline.result == 'success')
+      )
     env:
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
