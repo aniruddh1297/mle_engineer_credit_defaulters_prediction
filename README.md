@@ -1,182 +1,175 @@
-# ML Azure Interview Task - 1 Week Take-Home Challenge
+# 🧠 Credit Card Default Prediction using Azure Machine Learning
 
-This take-home assignment is designed to evaluate your ability to build an end-to-end machine learning solution using Azure Machine Learning. You have **1 week** to complete this task and will present your work in a **30-minute presentation** during the interview.
+## 📌 Overview
 
-## Timeline
-- **Preparation Time**: 1 week from receipt of this task
-- **Presentation**: 30 minutes during your interview session
-- **Q&A Session**: Additional time following the presentation for technical discussion
+This project builds a **production-ready ML pipeline** to predict whether a credit card client will default on their payment next month. The solution uses **Azure Machine Learning**, implements **MLOps best practices**, and includes support for **deployment, CI/CD, explainability, and business impact metrics**.
 
-## Objective
+## 💼 Business Problem
 
-Build a complete machine learning pipeline using Azure Machine Learning that predicts whether a credit card client will default on their payment next month. Your solution should demonstrate production-ready ML practices, clear architectural decisions, and thoughtful approach to model deployment considerations.
+Defaulting credit card customers significantly impact financial institutions. Accurately identifying high-risk clients enables the bank to take preventive action. This model predicts defaults using customer behavior and credit profile.
 
-## Project Structure
+## 🏗️ Architecture
 
-A starter folder structure is provided. You may modify or extend this structure as needed, ensuring the final solution is well-organized, documented, and reproducible.
+- Azure ML SDK v2 + MLFlow
+- Multi-component SDK pipeline: preprocess → train → evaluate
+- Cross-environment setup: dev, test, prod workspaces
+- Model promotion strategy from test → prod
+- Automated deployment via Azure Online Endpoints
+- CI/CD with GitHub Actions (includes conditional triggers for dev/test/prod)
+- Environment and component registration handled programmatically
 
-## Dataset
+## 📁 Project Structure
 
-Use the [UCI Credit Card Default Dataset](https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients) (Link: https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients)
+```
+.
+├── .github/workflows/            # CI/CD workflows
+├── data/                         # Raw dataset
+├── components/                   # Azure ML components
+│   ├── preprocess_component.py
+│   ├── train_component.py
+│   └── evaluate_component.py
+├── pipelines/                    # Run & register scripts
+│   ├── run_pipeline.py
+│   └── promote_model.py
+├── serve/                        # Deployment artifacts
+│   ├── score.py
+│   ├── inference_config.yaml
+│   ├── deploy_endpoint.py
+│   └── sample_request.json
+├── environments/                 # Conda environment YAMLs
+├── config/                       # Workspace config files
+├── register_scripts/            # Environment/component promotion
+│   ├── register_env.py
+│   ├── register_component.py
+│   └── promote_model.py
+├── requirements.txt
+└── README.md
+```
 
-**Target Variable**: "default payment next month"
-- `1` = Default
-- `0` = No default
+## 🧪 ML Pipeline Components
 
-## Core Requirements
+- 🔹 **Preprocessing**: Scales data, handles missing values
+- 🔹 **Training**: Trains XGBoost, Logistic Regression, Random Forest; logs best model via MLflow
+- 🔹 **Evaluation**:
+  - Classification metrics (F1, ROC-AUC, Precision/Recall)
+  - Cost-sensitive threshold optimization
+  - SHAP explainability
+  - Confusion matrix & curves logged to MLflow
 
-### 1. Data Pipeline (`src/preprocess.py`)
-- Load and explore the dataset
-- Implement data cleaning and preprocessing
-- Handle missing values, outliers, and data quality issues
-- Apply feature engineering techniques
-- Split data appropriately for training/validation/testing
+## 🚀 Deployment
 
-### 2. Model Development (`src/train.py`)
-- Implement and compare multiple classification algorithms
-- Apply proper cross-validation and hyperparameter tuning
-- Log experiments and metrics using Azure ML tracking
-- Justify your model selection approach
+The best model is deployed via Azure ML Online Endpoint:
 
-### 3. Model Evaluation (`src/evaluate.py`)
-- Comprehensive model evaluation with appropriate metrics
-- Generate performance visualizations and interpretation
-- Include business-relevant evaluation (e.g., cost-benefit analysis)
-- Document model limitations and potential biases
+- `score.py`: Inference script using MLflow
+- `deploy_endpoint.py`: Script to deploy endpoint
+- `inference_config.yaml`: Configuration for endpoint creation
+- `sample_request.json`: Test payload
 
-### 4. Azure ML Pipeline (`pipeline/run_pipeline.py`)
-- Create a complete Azure ML pipeline using SDK v2
-- Orchestrate: Data Preprocessing → Training → Evaluation → Registration
-- Implement proper error handling and logging
-- Make the pipeline parameterizable and reusable
+You can invoke the endpoint using:
+```bash
+curl -X POST <ENDPOINT_URL> -H "Authorization: Bearer <TOKEN>" -d @sample_request.json
+```
 
-### 5. Infrastructure Setup
-- Configure Azure ML workspace and compute resources
-- Document your resource choices and cost considerations
-- Ensure reproducibility across environments
+## 🔁 Model Promotion Strategy
 
-## Advanced Topics for Discussion (Choose 2-3)
+- Models are registered in the **test workspace** and evaluated.
+- If they pass performance thresholds, they are:
+  - Promoted via `promote_model.py` to the **prod workspace**
+  - Automatically deployed via CI/CD if the commit message includes `deploy to prod`
 
-Select 2-3 advanced topics to **discuss and analyze** in your presentation (implementation not required):
+> 🔒 NOTE: The model is currently not tagged as `validated`. This is a planned future enhancement.
 
-- **Model Monitoring**: Data drift detection strategies and model performance monitoring approaches
-- **Deployment Architecture**: Real-time vs batch inference design decisions and trade-offs
-- **MLOps Integration**: Automated retraining triggers, CI/CD pipeline considerations
-- **Model Explainability**: Interpretability requirements and implementation approaches (SHAP, LIME)
-- **Advanced ML Techniques**: Feature stores, automated feature engineering, or ensemble methods
-- **Security & Compliance**: Authentication, data encryption, and regulatory compliance considerations
+## ✅ CI/CD with GitHub Actions
 
-## Presentation Requirements
+CI/CD workflow automates:
+- Azure ML environment & component registration
+- Triggering the training pipeline
+- Promoting the best model to prod
+- Deploying the model to a managed online endpoint
 
-Your 30-minute presentation should cover:
+Customizable triggers:
+- Commit message with `pipeline-start`: runs pipeline even on `dev`
+- Commit message with `prod-run`: forces full pipeline in `main` (prod)
+- Otherwise, promotion from test to prod `main`
+- As for Test env , the pipeline will always run keeping in mind reproducibility and verification in mind
 
-### Technical Implementation (20 minutes)
-1. **Architecture Overview**
-   - Solution architecture diagram
-   - Azure services used and rationale
+CI/CD Workflow:
+```yaml
+# Azure ML Multi-Env Pipeline CI
+# (see .github/workflows/azureml-pipeline-ci.yml)
 
-2. **Data & Feature Engineering**
-   - Data exploration insights
-   - Feature engineering decisions
-   - Data quality considerations
+on:
+  push:
+    branches:
+      - release/dev
+      - release/test
+      - main
+    paths:
+      - "component_code/**.yaml"
+      - "component_code/**.py"
+      - "pipeline/run_pipeline.py"
+      - "register_scripts/**.py"
+      - "promote_model.py"
+      - "config/**.json"
+      - "requirements.txt"
+      - ".github/workflows/azureml-pipeline-ci.yml"
+```
 
-3. **Model Development**
-   - Model selection rationale
-   - Training approach and results
-   - Performance metrics and interpretation
+## 📈 Model Performance
 
-4. **Pipeline & Infrastructure**
-   - Azure ML pipeline design
-   - Compute and cost optimization
-   - Reproducibility measures
+| Metric       | Value   |
+|--------------|---------|
+| Accuracy     | 77.1%   |
+| F1 Score     | 55.1%   |
+| ROC-AUC      | 76.5%   |
+| Precision    | 48.6%   |
+| Recall       | 56.8%   |
+| Optimal Threshold | 0.69 |
+| Estimated Cost | ~764K |
 
-5. **Advanced Topics Discussion**
-   - Analysis of your chosen advanced topics
-   - Implementation approaches and trade-offs
+All metrics are logged to MLflow.
 
-### Business & Production Readiness (10 minutes)
-6. **Production Strategy**
-   - Deployment architecture recommendations
-   - Monitoring and maintenance strategy
-   - Risk assessment and mitigation
+## 🧠 Explainability
 
-7. **Business Impact**
-   - Model performance in business terms
-   - Cost-benefit analysis
-   - Recommendations for stakeholders
+SHAP values are computed and logged during evaluation. Beeswarm plots highlight most influential features in predictions. Saved as `shap_beeswarm.png` and logged to MLflow.
 
-### Q&A Session (Following the presentation)
-- Technical deep-dive into your implementation decisions
-- Discussion of alternative approaches and trade-offs
-- Code walkthrough if requested
+## 🔒 Cost & Security
 
-## Deliverables
+- Cost-sensitive thresholding built into evaluation.
+- Small instance types used (e.g., `Standard_E2s_v3`).
+- Credentials managed securely via Azure CLI & GitHub Secrets.
 
-### 1. Code Package (Zip file containing):
-- Complete source code with clear documentation
-- Requirements/environment files
-- README with setup instructions
-- Configuration files for Azure ML
+## 📎 How to Run Locally
 
-### 2. Technical Documentation
-- Architecture decisions and rationale
-- Model performance report
-- Instructions for reproducing your results
-- Cost analysis and optimization notes
+1. Clone the repo
+2. Set up environment:
+   ```bash
+   pip install -r requirements.txt
+   az login
+   ```
+3. Run:
+   ```bash
+   python register_scripts/register_env.py --env dev
+   python register_scripts/register_component.py --env dev
+   python pipelines/run_pipeline.py --env dev
+   ```
 
-### 3. Presentation Materials
-- Slides for your 30-minute presentation
-- Architecture diagrams
-- Performance visualizations
-- Screenshots of Azure ML workspace/pipelines
+To deploy:
+```bash
+cd serve
+python deploy_endpoint.py
+```
 
-Please send the zip-file containing your work to HR for further evaluation.
+## 🧪 Endpoint Testing
 
-## Evaluation Criteria
+Use `sample_request.json` and test with:
+```bash
+curl -X POST <URL> -H "Authorization: Bearer <TOKEN>" -d @sample_request.json
+```
 
-You will be assessed on:
+## 🙌 Acknowledgments
 
-**Technical Excellence**
-- Code quality, structure, and documentation
-- Proper use of Azure ML services
-- Implementation of ML best practices
-- Pipeline design and reproducibility
-
-**Problem-Solving Approach**
-- Data analysis and feature engineering quality
-- Model selection and validation methodology
-- Handling of edge cases and potential issues
-- Innovation in approach
-
-**Production Readiness**
-- Scalability and maintainability considerations
-- Monitoring and deployment strategy
-- Cost optimization and resource management
-- Security and compliance awareness
-
-**Communication**
-- Clarity of presentation and documentation
-- Ability to explain technical concepts
-- Business impact articulation
-- Response to technical questions
-
-## Setup and Support
-
-### Azure Resources
-- Please use a free azure subscription to perform the task
-
-### Questions and Clarifications
-- Technical questions can be sent via email
-- Response time: Within 24 hours on business days
-- No implementation guidance will be provided
-
-## Tips for Success
-
-1. **Start Early**: Set up your Azure environment on day 1
-2. **Focus on Fundamentals**: Ensure core requirements work perfectly before adding advanced features
-3. **Document Everything**: Clear documentation demonstrates professional development practices
-4. **Practice Your Presentation**: Time yourself and prepare for technical questions
-5. **Think Production-First**: Consider scalability, monitoring, and maintenance from the beginning
-6. **Show Your Thinking**: Explain your decisions and trade-offs clearly
-
-Good luck! We're excited to see your approach to this machine learning challenge.
+- Azure ML SDK v2
+- MLOps best practices
+- MLflow for experiment tracking
+- scikit-learn, XGBoost

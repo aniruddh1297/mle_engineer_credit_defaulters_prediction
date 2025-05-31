@@ -1,6 +1,34 @@
-{
-  "data": [
-    [20000, 2, 2, 1, 24, 2, 2, -1, -1, -2, -2, 3913, 3102, 689, 0, 0, 0, 0, 689, 0, 0, 0, 0],
-    [120000, 2, 2, 2, 26, -1, 2, 0, 0, 0, 2, 2682, 1725, 2682, 3272, 3455, 3261, 0, 1000, 1000, 1000, 0, 2000]
-  ]
+[
+ {
+  "limit_bal": 20000,
+  "sex": 1,
+  "education": 2,
+  "marriage": 1,
+  "age": 35,
+  "pay_0": 0,
+  "pay_2": 0,
+  "pay_3": 0,
+  "pay_4": 0,
+  "pay_5": 0,
+  "pay_6": 0,
+  "bill_amt1": 3913,
+  "bill_amt2": 3102,
+  "bill_amt3": 689,
+  "bill_amt4": 0,
+  "bill_amt5": 0,
+  "bill_amt6": 0,
+  "pay_amt1": 0,
+  "pay_amt2": 689,
+  "pay_amt3": 0,
+  "pay_amt4": 0,
+  "pay_amt5": 0,
+  "pay_amt6": 0,
+  "avg_bill_amt": 1284.0,
+  "avg_pay_amt": 114.83,
+  "pay_ratio": 0.09,
+  "recent_default_flag": 0,
+  "max_pay_delay": 0,
+  "bill_trend_up": 0,
+  "pay_stability": 260.67
 }
+]
