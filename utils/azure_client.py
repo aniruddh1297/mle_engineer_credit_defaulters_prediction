@@ -49,3 +49,6 @@ def get_ml_client(env_name="dev"):
         resource_group_name=resource_group,
         workspace_name=workspace_name,
     )
+
+
+#test
