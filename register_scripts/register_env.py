@@ -42,7 +42,7 @@ from utils.azure_client import get_ml_client
 
 def register_environment(ml_client):
     env_name = "mle-env"
-    conda_file_path = os.path.join("config", "environment.yaml")
+    conda_file_path = "config/environment.yaml"
 
     custom_env = Environment(
         name=env_name,
