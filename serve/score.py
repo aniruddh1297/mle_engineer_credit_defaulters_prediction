@@ -10,22 +10,45 @@ logger = logging.getLogger(__name__)
 
 model = None
 
+# def init():
+#     global model
+#     logger.info("🔁 Starting model initialization...")
+
+#     try:
+#         # 🔧 Correctly resolve path to the MLflow model directory
+#         model_path = os.path.join(os.getenv("AZUREML_MODEL_DIR"), "model")
+#         logger.info(f"📦 Resolved model path: {model_path}")
+
+#         # ✅ Load the MLflow model
+#         model = mlflow.pyfunc.load_model(model_path)
+#         logger.info("✅ Model loaded successfully.")
+#     except Exception as e:
+#         logger.error(f"❌ Failed to load model: {e}")
+#         raise
+
 def init():
     global model
     logger.info("🔁 Starting model initialization...")
 
     try:
-        # 🔧 Correctly resolve path to the MLflow model directory
-        model_path = os.path.join(os.getenv("AZUREML_MODEL_DIR"), "model")
-        logger.info(f"📦 Resolved model path: {model_path}")
+        base_model_dir = os.getenv("AZUREML_MODEL_DIR")
+        logger.info(f"🔍 Base model directory: {base_model_dir}")
 
-        # ✅ Load the MLflow model
+        # 🔍 Search for the folder containing the MLmodel file
+        for root, dirs, files in os.walk(base_model_dir):
+            if "MLmodel" in files:
+                model_path = root
+                break
+        else:
+            raise FileNotFoundError("❌ Could not find 'MLmodel' in any subdirectories.")
+
+        logger.info(f"📦 Resolved model path: {model_path}")
         model = mlflow.pyfunc.load_model(model_path)
         logger.info("✅ Model loaded successfully.")
     except Exception as e:
         logger.error(f"❌ Failed to load model: {e}")
         raise
-
+        
 def run(input_data):
     logger.info(f"📨 Received input: {input_data}")
 
