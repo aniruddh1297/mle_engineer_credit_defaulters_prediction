@@ -117,12 +117,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 📦 Register Environment
-        if: github.ref_name != 'release/dev' || contains(needs.checkout-and-setup.outputs.commit_message, 'pipeline-start')
         run: |
           python register_scripts/register_env.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
 
       - name: 📦 Register Azure ML Components
-        if: github.ref_name != 'release/dev' || contains(needs.checkout-and-setup.outputs.commit_message, 'pipeline-start')
         run: |
           python register_scripts/register_component.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
 
@@ -154,10 +152,11 @@ jobs:
           python pipeline/run_pipeline.py --env prod
 
   deploy:
-    needs: [promote, run-prod-pipeline]
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main'
+    needs: [promote, run-prod-pipeline]
+    if: |
+      needs.promote.result == 'success' || needs.run-prod-pipeline.result == 'success'
     steps:
-      - name: 🚀 Deploy model to Azure ML endpoint (prod only)
+      - name: 🚀 Deploy to endpoint
         run: |
           python serve/deploy_endpoint.py --env prod
