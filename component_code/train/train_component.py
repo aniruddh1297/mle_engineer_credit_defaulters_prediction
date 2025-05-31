@@ -36,8 +36,16 @@ def tune_model(model, param_dist, X_train, y_train):
 def main(args):
     X_train, y_train, X_val, y_val = load_data(args.input_data)
 
+    # ✅ Calculate class imbalance ratio for XGBoost
+    scale_pos_weight = len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+    mlflow.log_param("scale_pos_weight", scale_pos_weight)
+
     print("🔍 Tuning XGBoost...")
-    xgb = XGBClassifier(use_label_encoder=False, eval_metric="logloss")
+    xgb = XGBClassifier(
+        use_label_encoder=False,
+        eval_metric="logloss",
+        scale_pos_weight=scale_pos_weight  # ✅ imbalance handling
+    )
     xgb_params = {
         'max_depth': randint(3, 10),
         'learning_rate': uniform(0.01, 0.3),
@@ -48,7 +56,7 @@ def main(args):
     xgb_best, xgb_best_params, xgb_score = tune_model(xgb, xgb_params, X_train, y_train)
 
     print("\n🔍 Tuning RandomForest...")
-    rf = RandomForestClassifier()
+    rf = RandomForestClassifier(class_weight='balanced')  # ✅ imbalance handling
     rf_params = {
         'n_estimators': randint(50, 300),
         'max_depth': randint(3, 20),
@@ -57,7 +65,7 @@ def main(args):
     rf_best, rf_best_params, rf_score = tune_model(rf, rf_params, X_train, y_train)
 
     print("\n🔍 Tuning LogisticRegression...")
-    lr = LogisticRegression(solver='liblinear')
+    lr = LogisticRegression(solver='liblinear', class_weight='balanced')  # ✅ imbalance handling
     lr_params = {
         'C': uniform(0.01, 10),
         'penalty': ['l1', 'l2']

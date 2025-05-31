@@ -2,10 +2,13 @@ import argparse
 import joblib
 import os
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # For headless environments
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import mlflow
+import shap
 from sklearn.metrics import (
     accuracy_score, f1_score, roc_auc_score, confusion_matrix,
     precision_recall_curve, roc_curve
@@ -77,6 +80,25 @@ def plot_metrics(cm, probas, y_test, output_path):
 
     return cm_path, roc_path, pr_path
 
+def generate_shap_plot(model, X_test, output_path):
+    shap_path = os.path.join(output_path, "shap_beeswarm.png")
+    try:
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X_test)
+
+        plt.figure(figsize=(10, 6))
+        shap.summary_plot(shap_values, X_test, show=False)  # safer with summary_plot
+        plt.tight_layout()
+        plt.savefig(shap_path)
+        plt.close()
+
+        print("✅ SHAP summary plot saved.")
+        return shap_path
+    except Exception as e:
+        print(f"⚠️ SHAP explainability failed: {e}")
+        return None
+
+
 def write_notes(output_path, cm, cost):
     notes_path = os.path.join(output_path, "model_notes.txt")
     with open(notes_path, "w") as f:
@@ -95,6 +117,7 @@ def main(args):
     preds, probas, cm, y_test, acc, f1, roc_auc = evaluate_model(model, X_test, y_test, threshold)
     cm_path, roc_path, pr_path = plot_metrics(cm, probas, y_test, args.output_path)
     notes_path = write_notes(args.output_path, cm, cost)
+    shap_path = generate_shap_plot(model, X_test, args.output_path)
 
     mlflow.log_param("evaluation_threshold", threshold)
     mlflow.log_param("model_type", type(model).__name__)
@@ -108,6 +131,8 @@ def main(args):
     mlflow.log_artifact(roc_path)
     mlflow.log_artifact(pr_path)
     mlflow.log_artifact(notes_path)
+    if shap_path:
+        mlflow.log_artifact(shap_path)
 
     print("✅ Evaluation complete. Business impact optimized and logged.")
 
