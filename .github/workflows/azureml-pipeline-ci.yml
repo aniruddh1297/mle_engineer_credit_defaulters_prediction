@@ -105,10 +105,14 @@ jobs:
   register:
     needs: checkout-and-setup
     runs-on: ubuntu-latest
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WORKSPACE_NAME_DEV: ${{ secrets.AZURE_WORKSPACE_NAME_DEV }}
+      AZURE_WORKSPACE_NAME_TEST: ${{ secrets.AZURE_WORKSPACE_NAME_TEST }}
+      AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: 💾 Cache dependencies
         uses: actions/cache@v3
         with:
@@ -116,22 +120,18 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-
       - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 📦 Register Environment
         run: |
           python register_scripts/register_env.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
-
       - name: 📦 Register Azure ML Components
         run: |
           python register_scripts/register_component.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
@@ -140,10 +140,14 @@ jobs:
     needs: register
     runs-on: ubuntu-latest
     if: github.ref_name != 'main' && (github.ref_name != 'release/dev' || contains(needs.checkout-and-setup.outputs.commit_message, 'pipeline-start'))
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WORKSPACE_NAME_DEV: ${{ secrets.AZURE_WORKSPACE_NAME_DEV }}
+      AZURE_WORKSPACE_NAME_TEST: ${{ secrets.AZURE_WORKSPACE_NAME_TEST }}
+      AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: 💾 Cache dependencies
         uses: actions/cache@v3
         with:
@@ -151,18 +155,15 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-
       - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 🚀 Run Azure ML Pipeline (Dev/Test)
         run: |
           python pipeline/run_pipeline.py --env ${{ github.ref_name == 'release/test' && 'test' || 'dev' }}
@@ -171,10 +172,14 @@ jobs:
     needs: register
     runs-on: ubuntu-latest
     if: github.ref_name == 'main' && !contains(needs.checkout-and-setup.outputs.commit_message, 'prod-run')
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WORKSPACE_NAME_DEV: ${{ secrets.AZURE_WORKSPACE_NAME_DEV }}
+      AZURE_WORKSPACE_NAME_TEST: ${{ secrets.AZURE_WORKSPACE_NAME_TEST }}
+      AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: 💾 Cache dependencies
         uses: actions/cache@v3
         with:
@@ -182,30 +187,31 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-
       - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 🔁 Promote model to prod
         run: |
-          python register_scripts/promote_model.py
+          python promote_scripts/promote_model.py
 
   run-prod-pipeline:
     needs: register
     runs-on: ubuntu-latest
     if: github.ref_name == 'main' && contains(needs.checkout-and-setup.outputs.commit_message, 'prod-run')
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WORKSPACE_NAME_DEV: ${{ secrets.AZURE_WORKSPACE_NAME_DEV }}
+      AZURE_WORKSPACE_NAME_TEST: ${{ secrets.AZURE_WORKSPACE_NAME_TEST }}
+      AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: 💾 Cache dependencies
         uses: actions/cache@v3
         with:
@@ -213,18 +219,15 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-
       - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 🚀 Run full Azure ML Pipeline in prod
         run: |
           python pipeline/run_pipeline.py --env prod
@@ -234,10 +237,14 @@ jobs:
     needs: [promote, run-prod-pipeline]
     if: |
       needs.promote.result == 'success' || needs.run-prod-pipeline.result == 'success'
+    env:
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      AZURE_WORKSPACE_NAME_DEV: ${{ secrets.AZURE_WORKSPACE_NAME_DEV }}
+      AZURE_WORKSPACE_NAME_TEST: ${{ secrets.AZURE_WORKSPACE_NAME_TEST }}
+      AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
-      - name: ⬇️ Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: 💾 Cache dependencies
         uses: actions/cache@v3
         with:
@@ -245,18 +252,16 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-
       - name: 📦 Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-
       - name: 🔐 Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
       - name: 🚀 Deploy to endpoint
         run: |
           python serve/deploy_endpoint.py --env prod
+
