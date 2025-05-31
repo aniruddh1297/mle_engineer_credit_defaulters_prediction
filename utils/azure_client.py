@@ -35,8 +35,12 @@ def get_ml_client(env_name="dev"):
     workspace_key = f"AZURE_WORKSPACE_NAME_{env_name.upper()}"
     workspace_name = os.environ.get(workspace_key)
 
+    print(f"🔍 SUBSCRIPTION: {subscription_id}")
+    print(f"🔍 RESOURCE GROUP: {resource_group}")
+    print(f"🔍 WORKSPACE: {workspace_name}")
+
     if not (subscription_id and resource_group and workspace_name):
-        raise ValueError(f"❌ Missing Azure environment variables for env: {env_name}")
+        raise ValueError("❌ Missing Azure environment configuration.")
 
     credential = DefaultAzureCredential()
     return MLClient(
@@ -45,5 +49,3 @@ def get_ml_client(env_name="dev"):
         resource_group_name=resource_group,
         workspace_name=workspace_name,
     )
-
-#test
