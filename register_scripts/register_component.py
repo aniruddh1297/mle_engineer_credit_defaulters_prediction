@@ -1,14 +1,10 @@
+import sys
 import os
-import argparse
-from azure.identity import DefaultAzureCredential
-from azure.ai.ml import MLClient, load_component
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # ✅ add project root to sys.path
 
-def get_ml_client(env_name="dev"):
-    config_path = f".azureml/config.{env_name}.json"
-    if not os.path.exists(config_path):
-        raise FileNotFoundError(f"❌ Config file not found: {config_path}")
-    credential = DefaultAzureCredential()
-    return MLClient.from_config(credential=credential, path=config_path)
+import argparse
+from azure.ai.ml import MLClient, load_component
+from utils.azure_client import get_ml_client  # ✅ safe import
 
 def register_components(ml_client):
     component_paths = []
