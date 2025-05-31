@@ -131,7 +131,12 @@ jobs:
         run: |
           python pipeline/run_pipeline.py --env ${{ github.ref_name == 'release/test' && 'test' || 'dev' }}
 
-      - name: 🏁 Promote Validated Model to Prod
-        if: github.ref_name == 'main'
+      - name: 🔁 Promote model to prod (default)
+        if: github.ref_name == 'main' && !contains(steps.get_commit.outputs.message, 'prod-run')
         run: |
-          python promote_scripts/promote_model.py
+          python register_scripts/promote_model.py
+
+      - name: 🚀 Run full Azure ML Pipeline in prod (if forced)
+        if: github.ref_name == 'main' && contains(steps.get_commit.outputs.message, 'prod-run')
+        run: |
+          python pipeline/run_pipeline.py --env prod
