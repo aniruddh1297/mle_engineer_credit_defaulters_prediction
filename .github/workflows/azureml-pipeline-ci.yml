@@ -1,3 +1,70 @@
+# name: Azure ML Multi-Env Pipeline CI
+
+# on:
+#   push:
+#     branches:
+#       - release/dev
+#       - release/test
+#       - main
+#     paths:
+#       - "component_code/**.yaml"
+#       - "component_code/**.py"
+#       - "pipeline/run_pipeline.py"
+#       - "register_scripts/**.py"
+#       - "config/**.yaml"
+#       - ".github/workflows/azureml-pipeline-ci.yml"
+
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: ⬇️ Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: 🐍 Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: "3.10"
+
+#       - name: 📦 Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -r requirements.txt
+#           pip install azure-ai-ml azure-identity
+
+#       - name: 🔐 Login to Azure
+#         uses: azure/login@v1
+#         with:
+#           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+#       - name: 📄 Get last commit message
+#         id: get_commit
+#         run: |
+#           {
+#             echo "message<<EOF"
+#             git log -1 --pretty=%B
+#             echo "EOF"
+#           } >> "$GITHUB_OUTPUT"
+
+#       - name: 📦 Register Environment
+#         if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
+#         run: |
+#           python register_scripts/register_env.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+#       - name: 📦 Register Azure ML Components
+#         if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
+#         run: |
+#           python register_scripts/register_component.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+#       - name: 🚀 Run Azure ML Pipeline
+#         if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
+#         run: |
+#           python pipeline/run_pipeline.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+
+
+
+
 name: Azure ML Multi-Env Pipeline CI
 
 on:
@@ -11,7 +78,9 @@ on:
       - "component_code/**.py"
       - "pipeline/run_pipeline.py"
       - "register_scripts/**.py"
-      - "config/**.yaml"
+      - "promote_model.py"
+      - "config/**.json"
+      - "requirements.txt"
       - ".github/workflows/azureml-pipeline-ci.yml"
 
 jobs:
@@ -57,9 +126,12 @@ jobs:
         run: |
           python register_scripts/register_component.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
 
-      - name: 🚀 Run Azure ML Pipeline
-        if: github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start')
+      - name: 🚀 Run Azure ML Pipeline (Dev/Test Only)
+        if: github.ref_name != 'main' && (github.ref_name != 'release/dev' || contains(steps.get_commit.outputs.message, 'pipeline-start'))
         run: |
-          python pipeline/run_pipeline.py --env ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'release/test' && 'test' || 'dev' }}
+          python pipeline/run_pipeline.py --env ${{ github.ref_name == 'release/test' && 'test' || 'dev' }}
 
-
+      - name: 🏁 Promote Validated Model to Prod
+        if: github.ref_name == 'main'
+        run: |
+          python promote_scripts/promote_model.py

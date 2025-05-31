@@ -205,20 +205,21 @@ def plot_metrics(cm, probas, y_test, output_path):
 def generate_shap_plot(model, X_test, output_path):
     shap_path = os.path.join(output_path, "shap_beeswarm.png")
     try:
-        explainer = shap.Explainer(model, X_test)
-        shap_values = explainer(X_test)
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X_test)
 
         plt.figure(figsize=(10, 6))
-        shap.plots.beeswarm(shap_values, show=False)
+        shap.summary_plot(shap_values, X_test, show=False)  # safer with summary_plot
         plt.tight_layout()
         plt.savefig(shap_path)
         plt.close()
 
-        print("✅ SHAP beeswarm plot saved.")
+        print("✅ SHAP summary plot saved.")
         return shap_path
     except Exception as e:
         print(f"⚠️ SHAP explainability failed: {e}")
         return None
+
 
 def write_notes(output_path, cm, cost):
     notes_path = os.path.join(output_path, "model_notes.txt")
