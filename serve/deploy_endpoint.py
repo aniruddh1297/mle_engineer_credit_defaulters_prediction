@@ -1,68 +1,3 @@
-# # ✅ serve/deploy_endpoint.py
-# import uuid
-# from azure.identity import DefaultAzureCredential
-# from azure.ai.ml import MLClient
-# from azure.ai.ml.entities import ManagedOnlineEndpoint, ManagedOnlineDeployment
-# from azure.ai.ml.entities import CodeConfiguration
-# import os
-
-# # 🔐 Authenticate using config from parent folder
-# credential = DefaultAzureCredential()
-# ml_client = MLClient.from_config(credential=credential, path="config/config.dev.json")
-
-# # 🎯 Define endpoint name
-# endpoint_name = "credit-default-endpoint"
-
-# # 🧼 Delete if exists
-# try:
-#     ml_client.online_endpoints.begin_delete(name=endpoint_name).result()
-#     print("🗑️ Deleted existing endpoint")
-# except Exception:
-#     print("ℹ️ Endpoint does not exist, continuing...")
-
-# # 🚀 Create endpoint
-# endpoint = ManagedOnlineEndpoint(
-#     name=endpoint_name,
-#     description="Online scoring endpoint for credit default model",
-#     auth_mode="key",
-#     tags={
-#         "purpose": "production",
-#         "owner": "anirudh",
-#         "env": "prod"
-#     }
-# )
-# ml_client.begin_create_or_update(endpoint).result()
-# print("✅ Endpoint created")
-
-# # Get latest model
-# model_versions = list(ml_client.models.list(name="credit-default-model"))
-# latest_model = max(model_versions, key=lambda m: int(m.version))
-
-# # Get latest environment
-# env_versions = list(ml_client.environments.list(name="mle-env"))
-# latest_env = max(env_versions, key=lambda e: int(e.version))
-
-# # Create deployment
-# deployment = ManagedOnlineDeployment(
-#     name="blue",
-#     endpoint_name=endpoint_name,
-#     model=latest_model,
-#     environment=latest_env,
-#     code_configuration=CodeConfiguration(
-#         code="./serve", 
-#         scoring_script="score.py"
-#     ),
-#     instance_type="Standard_E2s_v3",
-#     instance_count=2
-# )
-# ml_client.begin_create_or_update(deployment).result()
-# print("🚀 Deployment completed")
-
-# # 🔁 Route traffic to blue deployment
-# endpoint.traffic = {"blue": 100}
-# ml_client.begin_create_or_update(endpoint).result()
-# print("✅ Traffic routed to deployment 'blue'")
-
 import argparse
 import os
 from azure.identity import DefaultAzureCredential
@@ -93,7 +28,7 @@ def deploy_endpoint(ml_client, env_name):
         description=f"Scoring endpoint for credit default model in {env_name}",
         auth_mode="key",
         tags={
-            "purpose": "production" if env_name == "prod" else "staging",
+            "purpose": "production" if env_name == "prod" else "staging" if env_name == "test" else "dev",
             "env": env_name,
             "owner": "anirudh"
         }
