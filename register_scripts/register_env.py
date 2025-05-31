@@ -44,9 +44,9 @@ def register_environment(ml_client):
     env_name = "mle-env"
     conda_file_path = os.path.join("config", "environment.yaml")
 
-    # ✅ Use from_conda_specification to avoid deserialization/URL issues
-    custom_env = Environment.from_conda_specification(
+    custom_env = Environment(
         name=env_name,
+        description="Environment for MLE project (DKV)",
         conda_file=conda_file_path,
         image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04"
     )
