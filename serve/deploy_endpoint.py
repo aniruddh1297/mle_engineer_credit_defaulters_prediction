@@ -283,13 +283,6 @@ def deploy_endpoint(ml_client, env_name):
     ml_client.begin_create_or_update(deployment).result()
     print(f"🚀 Deployment completed with model v: {latest_model.version}")
 
-    # 🔁 Route traffic
-    ml_client.online_endpoints.update_traffic(
-        name=endpoint_name,
-        traffic={"blue": 100}
-    )
-    print("✅ 100% traffic routed to 'blue' deployment")
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
