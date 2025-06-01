@@ -1,6 +1,6 @@
 name: evaluate_model_v1
 display_name: Evaluate Model
-version: 17
+version: 18
 type: command
 
 inputs:
