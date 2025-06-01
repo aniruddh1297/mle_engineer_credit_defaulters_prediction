@@ -63,22 +63,22 @@ def train_and_select_best(X_train, y_train):
             n_jobs=-1
         )
         search.fit(X_train, y_train)
-        print(f"✅ {name} Best F1: {search.best_score_:.4f}")
-        print(f"✅ {name} Best Params: {search.best_params_}")
+        print(f"{name} Best F1: {search.best_score_:.4f}")
+        print(f"{name} Best Params: {search.best_params_}")
 
         if search.best_score_ > best_score:
             best_score = search.best_score_
             best_model = search.best_estimator_
             best_name = name
 
-    print(f"\n🏆 Selected Model: {best_name} with F1: {best_score:.4f}")
+    print(f"\nSelected Model: {best_name} with F1: {best_score:.4f}")
     return best_model
 
 
 def save_model(model, path):
     os.makedirs(path, exist_ok=True)
     joblib.dump(model, os.path.join(path, "best_model.pkl"))
-    print(f"✅ Model saved at {path}/best_model.pkl")
+    print(f" Model saved at {path}/best_model.pkl")
 
 
 def main():

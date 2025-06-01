@@ -61,7 +61,7 @@ def main(args):
     scaler_path = os.path.join(args.output_path, "scaler.pkl")
     joblib.dump(scaler, scaler_path)
 
-    # Log to MLflow
+    
     mlflow.log_param("scaler", "StandardScaler")
     mlflow.log_param("num_rows", len(df))
     mlflow.log_param("num_features", split_stats["num_features"])
@@ -69,15 +69,15 @@ def main(args):
     mlflow.log_metric("val_size", split_stats["val_size"])
     mlflow.log_metric("test_size", split_stats["test_size"])
 
-    # Log label distribution
+    
     class_counts = y.value_counts().to_dict()
     for label, count in class_counts.items():
         mlflow.log_metric(f"label_{label}_count", count)
 
-    # Log scaler file
+    
     mlflow.log_artifact(scaler_path)
 
-    print("✅ Preprocessing complete and parameters logged with MLflow.")
+    print("Preprocessing complete and parameters logged with MLflow.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

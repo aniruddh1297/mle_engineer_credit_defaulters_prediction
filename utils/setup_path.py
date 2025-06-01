@@ -1,4 +1,3 @@
-# utils/setup_path.py
 import sys, os
 
 def add_project_root():

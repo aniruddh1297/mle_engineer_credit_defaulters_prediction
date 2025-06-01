@@ -2,26 +2,21 @@ $schema: https://azuremlschemas.azureedge.net/latest/onlineDeployment.schema.jso
 name: blue-deployment
 endpoint_name: credit-default-endpoint
 
-# 🔁 Model reference using latest version
 model:
   name: credit-default-model
   version: '@latest'
 
-# 🧪 Environment using latest version
 environment:
   name: mle-env
   version: '@latest'
 
-# 🧠 Scoring logic and source code path
 code_configuration:
   code: ./serve
   scoring_script: score.py
 
-# ⚙️ Compute settings
 instance_type: Standard_DS2_v2
 instance_count: 1
 
-# 🏷️ Metadata tags
 tags:
   purpose: production
   owner: anirudh

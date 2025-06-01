@@ -3,7 +3,7 @@ import joblib
 import os
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # For headless environments
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -30,7 +30,7 @@ def optimize_cost_threshold(y_true, probas, cost_fp=1000, cost_fn=900):
         if total_cost < best_cost:
             best_cost = total_cost
             best_thresh = t
-    print(f"💸 Best Threshold for Cost: {best_thresh:.2f} | Min Cost: {best_cost}")
+    print(f"Best Threshold for Cost: {best_thresh:.2f} | Min Cost: {best_cost}")
     return best_thresh, best_cost
 
 def evaluate_model(model, X_test, y_test, threshold):
@@ -92,10 +92,10 @@ def generate_shap_plot(model, X_test, output_path):
         plt.savefig(shap_path)
         plt.close()
 
-        print("✅ SHAP summary plot saved.")
+        print("SHAP summary plot saved.")
         return shap_path
     except Exception as e:
-        print(f"⚠️ SHAP explainability failed: {e}")
+        print(f"SHAP explainability failed: {e}")
         return None
 
 
@@ -134,7 +134,7 @@ def main(args):
     if shap_path:
         mlflow.log_artifact(shap_path)
 
-    print("✅ Evaluation complete. Business impact optimized and logged.")
+    print("Evaluation complete. Business impact optimized and logged.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

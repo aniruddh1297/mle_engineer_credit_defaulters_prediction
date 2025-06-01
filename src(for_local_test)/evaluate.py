@@ -24,7 +24,7 @@ def optimize_threshold(y_true, probas, beta=1.0):
             best_fscore = score
             best_thresh = t
 
-    print(f"🎯 Best Threshold for F{beta}-Score: {best_thresh:.2f} | F{beta}: {best_fscore:.4f}")
+    print(f"Best Threshold for F{beta}-Score: {best_thresh:.2f} | F{beta}: {best_fscore:.4f}")
     return best_thresh
 
 def evaluate_model(model, X_test, y_test, threshold):
@@ -46,7 +46,7 @@ def evaluate_model(model, X_test, y_test, threshold):
 def plot_metrics(cm, probas, y_test):
     os.makedirs("doc", exist_ok=True)
 
-    # Confusion Matrix
+    
     plt.figure(figsize=(6, 4))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
     plt.title("Confusion Matrix")
@@ -56,7 +56,7 @@ def plot_metrics(cm, probas, y_test):
     plt.savefig("doc/confusion_matrix.png")
     plt.close()
 
-    # ROC Curve
+    
     fpr, tpr, _ = roc_curve(y_test, probas)
     plt.figure(figsize=(6, 4))
     plt.plot(fpr, tpr, label='ROC Curve')
@@ -69,7 +69,7 @@ def plot_metrics(cm, probas, y_test):
     plt.savefig("doc/roc_curve.png")
     plt.close()
 
-    # Precision-Recall Curve
+   
     precision, recall, _ = precision_recall_curve(y_test, probas)
     plt.figure(figsize=(6, 4))
     plt.plot(recall, precision)
@@ -81,13 +81,13 @@ def plot_metrics(cm, probas, y_test):
     plt.close()
 
 def main():
-    beta = 1.0  # Set beta = 1 for F1, beta = 2 for F2
+    beta = 1.0  
     X_test, y_test, model = load_data()
     probas = model.predict_proba(X_test)[:, 1]
     threshold = optimize_threshold(y_test, probas, beta=beta)
     preds, probas, cm, y_test = evaluate_model(model, X_test, y_test, threshold)
     plot_metrics(cm, probas, y_test)
-    print("✅ Evaluation v4 complete with F-beta optimization.")
+    print("Evaluation v4 complete with F-beta optimization.")
 
 if __name__ == "__main__":
     main()
