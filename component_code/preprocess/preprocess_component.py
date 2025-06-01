@@ -77,7 +77,7 @@ def main(args):
     # Log scaler file
     mlflow.log_artifact(scaler_path)
 
-    print("✅ Preprocessing complete and parameters logged with MLflow.")
+    print("Preprocessing complete and parameters logged with MLflow.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

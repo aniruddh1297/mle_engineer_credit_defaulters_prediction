@@ -92,10 +92,10 @@ def generate_shap_plot(model, X_test, output_path):
         plt.savefig(shap_path)
         plt.close()
 
-        print("✅ SHAP summary plot saved.")
+        print("SHAP summary plot saved.")
         return shap_path
     except Exception as e:
-        print(f"⚠️ SHAP explainability failed: {e}")
+        print(f"SHAP explainability failed: {e}")
         return None
 
 
@@ -134,7 +134,7 @@ def main(args):
     if shap_path:
         mlflow.log_artifact(shap_path)
 
-    print("✅ Evaluation complete. Business impact optimized and logged.")
+    print("Evaluation complete. Business impact optimized and logged.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
