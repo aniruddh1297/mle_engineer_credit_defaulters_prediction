@@ -81,6 +81,15 @@ jobs:
       AZURE_WORKSPACE_NAME_PROD: ${{ secrets.AZURE_WORKSPACE_NAME_PROD }}
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Debug ENV values
+        run: |
+          echo "SUBSCRIPTION = $AZURE_SUBSCRIPTION_ID"
+          echo "RESOURCE GROUP = $AZURE_RESOURCE_GROUP"
+          echo "WORKSPACE_DEV = $AZURE_WORKSPACE_NAME_DEV"
+          echo "WORKSPACE_TEST = $AZURE_WORKSPACE_NAME_TEST"
+          echo "WORKSPACE_PROD = $AZURE_WORKSPACE_NAME_PROD"
+
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
