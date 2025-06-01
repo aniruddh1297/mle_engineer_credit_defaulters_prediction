@@ -18,13 +18,13 @@ def clean_data(df):
     return df
 
 def feature_engineering(df):
-    # Aggregated features
+    
     df['avg_bill_amt'] = df[[f'bill_amt{i}' for i in range(1, 7)]].mean(axis=1)
     df['avg_pay_amt'] = df[[f'pay_amt{i}' for i in range(1, 7)]].mean(axis=1)
     df['pay_ratio'] = (df['avg_pay_amt'] / df['avg_bill_amt']).replace([np.inf, -np.inf], 0).fillna(0)
     df['recent_default_flag'] = (df['pay_0'] >= 1).astype(int)
 
-    # New behavioral/risk features
+    
     df['max_pay_delay'] = df[['pay_0', 'pay_2', 'pay_3', 'pay_4', 'pay_5', 'pay_6']].max(axis=1)
     df['bill_trend_up'] = (df['bill_amt6'] > df['bill_amt1']).astype(int)
     df['pay_stability'] = df[[f'pay_amt{i}' for i in range(1, 7)]].std(axis=1).fillna(0)
@@ -54,7 +54,7 @@ def main():
     X, y, scaler = feature_engineering(df)
     split_and_save(X, y, output_dir)
     joblib.dump(scaler, os.path.join(output_dir, "scaler.pkl"))
-    print("✅ Preprocessing v2 complete with advanced features.")
+    print("Preprocessing v2 complete with advanced features.")
 
 if __name__ == "__main__":
     main()

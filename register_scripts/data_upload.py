@@ -1,25 +1,24 @@
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # ✅ Add project root
-
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) 
 import argparse
 import urllib.request
 import hashlib
 from datetime import datetime
 from azure.ai.ml.entities import Data
 from azure.ai.ml.constants import AssetTypes
-from utils.azure_client import get_ml_client  # ✅ Centralized credential/config logic
+from utils.azure_client import get_ml_client  
 
 
 def download_google_sheet_as_excel(local_path: str, sheet_id: str):
     if not os.path.exists(local_path):
         os.makedirs(os.path.dirname(local_path), exist_ok=True)
         url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=xlsx"
-        print(f"⬇️ Downloading spreadsheet as Excel from: {url}")
+        print(f"Downloading spreadsheet as Excel from: {url}")
         urllib.request.urlretrieve(url, local_path)
-        print(f"✅ Downloaded spreadsheet to: {local_path}")
+        print(f"Downloaded spreadsheet to: {local_path}")
     else:
-        print(f"✅ Dataset already exists locally: {local_path}")
+        print(f"Dataset already exists locally: {local_path}")
 
 
 def calculate_file_hash(file_path: str) -> str:
@@ -34,16 +33,14 @@ def upload_data(ml_client, local_path):
     base_name = "credit_default_data"
     file_hash = calculate_file_hash(local_path)
 
-    print(f"🔍 Calculated MD5 hash: {file_hash}")
+    print(f"Calculated MD5 hash: {file_hash}")
 
-    # Check if dataset with same hash already exists
     existing_assets = list(ml_client.data.list(name=base_name))
     for asset in existing_assets:
         if asset.tags and asset.tags.get("hash") == file_hash:
-            print(f"⚠️ Identical dataset already registered: {asset.name}:{asset.version} — skipping upload.")
+            print(f"Identical dataset already registered: {asset.name}:{asset.version} — skipping upload.")
             return
 
-    # Register new version
     timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
     version = f"v{timestamp}"
 
@@ -57,7 +54,7 @@ def upload_data(ml_client, local_path):
     )
 
     ml_client.data.create_or_update(data_asset)
-    print(f"📦 Registered new data asset: {base_name}:{version}")
+    print(f"Registered new data asset: {base_name}:{version}")
 
 
 if __name__ == "__main__":
@@ -75,5 +72,6 @@ if __name__ == "__main__":
         download_google_sheet_as_excel(local_path, sheet_id)
 
     ml_client = get_ml_client(args.env)
-    print(f"✅ Connected to workspace: {ml_client.workspace_name}")
+    print(f"Connected to workspace: {ml_client.workspace_name}")
     upload_data(ml_client, local_path)
+

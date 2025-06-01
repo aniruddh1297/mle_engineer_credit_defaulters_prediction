@@ -2,23 +2,18 @@ name: train_model_v1
 version: 33
 display_name: Train Model
 
-# Define the type of job
 type: command
 
-# Define the inputs
 inputs:
   input_data:
     type: uri_folder
 
-# Define the outputs
 outputs:
   output_path:
     type: uri_folder
 
-# Define environment (should already be registered)
 environment: azureml:mle-env@latest
 
-# Code folder and entry command
 code: .
 command: >
   python train_component.py --input_data ${{inputs.input_data}} --output_path ${{outputs.output_path}}
