@@ -116,8 +116,8 @@ on:
 | ROC-AUC      | 76.5%   |
 | Precision    | 48.6%   |
 | Recall       | 56.8%   |
-| Threshold    | 0.69    |
-| Cost Estimate| ~€764K  |
+| Threshold    | 0.79    |
+| Cost Estimate| ~€747K  |
 
 ## Explainability
 
