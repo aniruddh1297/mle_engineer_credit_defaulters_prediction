@@ -98,7 +98,7 @@ def main(args):
     with open(conf_matrix_file, "w") as f:
         f.write(np.array2string(conf_matrix))
 
-    # Log to MLflow
+    
     mlflow.log_param("selected_model", best_name)
     mlflow.log_params(best_params)
     mlflow.log_metric("best_f1_score", best_score)

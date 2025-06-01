@@ -22,9 +22,9 @@ def init():
                 model_path = root
                 break
         else:
-            raise FileNotFoundError("❌ Could not find 'MLmodel' in any subdirectories.")
+            raise FileNotFoundError("Could not find 'MLmodel' in any subdirectories.")
 
-        logger.info(f"📦 Resolved model path: {model_path}")
+        logger.info(f"Resolved model path: {model_path}")
         model = mlflow.pyfunc.load_model(model_path)
         logger.info("Model loaded successfully.")
     except Exception as e:

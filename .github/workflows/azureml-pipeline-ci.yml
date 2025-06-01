@@ -58,7 +58,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-      - name: 🔐 Login to Azure
+      - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -134,7 +134,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install azure-ai-ml azure-identity
-      - name: 🔐 Login to Azure
+      - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}

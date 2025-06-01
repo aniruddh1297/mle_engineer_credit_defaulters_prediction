@@ -3,7 +3,7 @@ import joblib
 import os
 import numpy as np
 import matplotlib
-matplotlib.use('Agg')  # For headless environments
+matplotlib.use('Agg') 
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -30,7 +30,7 @@ def optimize_cost_threshold(y_true, probas, cost_fp=1000, cost_fn=900):
         if total_cost < best_cost:
             best_cost = total_cost
             best_thresh = t
-    print(f"💸 Best Threshold for Cost: {best_thresh:.2f} | Min Cost: {best_cost}")
+    print(f"Best Threshold for Cost: {best_thresh:.2f} | Min Cost: {best_cost}")
     return best_thresh, best_cost
 
 def evaluate_model(model, X_test, y_test, threshold):

@@ -12,7 +12,7 @@ from utils.azure_client import get_ml_client
 
 def deploy_endpoint(ml_client, env_name):
     endpoint_name = f"credit-default-endpoint-{env_name}"
-    print(f"🚀 Starting deployment to {env_name.upper()} workspace: {ml_client.workspace_name}")
+    print(f"Starting deployment to {env_name.upper()} workspace: {ml_client.workspace_name}")
 
     try:
         ml_client.online_endpoints.get(name=endpoint_name)

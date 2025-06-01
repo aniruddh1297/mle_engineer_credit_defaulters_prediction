@@ -1,14 +1,14 @@
 # 🧠 Credit Card Default Prediction using Azure Machine Learning
 
-## 📌 Overview
+## Overview
 
 This project builds a **production-grade ML pipeline** to predict whether a credit card client will default on their next payment. The solution uses **Azure Machine Learning SDK v2**, applies **MLOps best practices**, and supports **CI/CD, explainability, automated deployment**, and **cost-sensitive evaluation**.
 
-## 💼 Business Problem
+## Business Problem
 
 Defaulting credit card customers significantly impact financial institutions. Accurately identifying high-risk clients enables the bank to take preventive action. This model predicts defaults using customer behavior and credit profile.
 
-## 🏗️ Architecture
+## Architecture
 
 - Azure ML SDK v2 + MLFlow
 - Multi-component SDK pipeline: preprocess → train → evaluate
@@ -18,7 +18,7 @@ Defaulting credit card customers significantly impact financial institutions. Ac
 - CI/CD with GitHub Actions (includes conditional triggers for dev/test/prod)
 - Environment and component registration handled programmatically
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 .  
@@ -55,7 +55,7 @@ Defaulting credit card customers significantly impact financial institutions. Ac
 └── requirements.txt                 
 ```
 
-## 🧪 ML Pipeline Components
+## ML Pipeline Components
 
 - **Preprocessing**: Scales data, handles missing values
 - **Training**: Trains XGBoost, Logistic Regression, Random Forest; logs best model via MLflow
@@ -65,7 +65,7 @@ Defaulting credit card customers significantly impact financial institutions. Ac
   - SHAP explainability
   - Confusion matrix & curves logged to MLflow
 
-## 🚀 Deployment
+## Deployment
 
 - `score.py`: Inference script using MLflow
 - `deploy_endpoint.py`: Script to deploy endpoint
@@ -76,14 +76,14 @@ Defaulting credit card customers significantly impact financial institutions. Ac
 curl -X POST <ENDPOINT_URL> -H "Authorization: Bearer <TOKEN>" -d @sample_request.json
 ```
 
-## 🔁 Model Promotion Strategy
+## Model Promotion Strategy
 
 - Models are registered in the **test workspace** and evaluated.
 - If they pass performance thresholds:
   - Promoted via `promote_model.py` to **prod**
   - Deployed automatically if `prod-run` is used in commit message
 
-## ✅ CI/CD with GitHub Actions
+## CI/CD with GitHub Actions
 
 Automates:
 - Component and environment registration
@@ -107,7 +107,7 @@ on:
       - main
 ```
 
-## 📈 Model Performance
+## Model Performance
 
 | Metric       | Value   |
 |--------------|---------|
@@ -119,20 +119,20 @@ on:
 | Threshold    | 0.69    |
 | Cost Estimate| ~€764K  |
 
-## 🧠 Explainability
+## Explainability
 
 SHAP values highlight feature contributions. Logged:
 - `shap_beeswarm.png`
 - ROC/PR curves
 - Confusion matrix heatmap
 
-## 🔒 Cost & Security
+## Cost & Security
 
 - Threshold optimized using cost matrix (FP: €1,000, FN: €900)
 - Uses small instances (`Standard_E2s_v3`)
 - Secure token-based deployment via Azure and GitHub secrets
 
-## ▶️ Running Locally
+## Running Locally
 
 ```bash
 pip install -r requirements.txt
@@ -152,13 +152,13 @@ cd serve
 python deploy_endpoint.py --env prod
 ```
 
-## 🧪 Endpoint Test
+## Endpoint Test
 
 ```bash
 curl -X POST <URL> -H "Authorization: Bearer <TOKEN>" -d @serve/sample_request.json
 ```
 
-## 🙌 Acknowledgments
+## Acknowledgments
 
 - Azure Machine Learning SDK v2
 - MLflow for experiment tracking
